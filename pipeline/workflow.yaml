@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: argo-demo-
+  labels:
+    workflows.argoproj.io/archive-strategy: "false"
+  generateName: documize-pipeline-
+  namespace: 101ed4-tools
+spec:
+  serviceAccountName: workflow-creator
+  entrypoint: main
+  container:
+    - resources:
+        limits:
+          cpu: 100m
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        storageClassName: "netapp-block-standard"
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 64Mi
+
+  templates:
+    - name: main
+      steps:
+        - - name: clone
+            template: clone
+            arguments:
+              parameters:
+                - name: repo
+                  value: "https://github.com/BCDevOps/platform-services-documize"
+                - name: branch
+                  value: "dev/patroni-backup-initial-argo"
+        # - - name: promote-to-dev
+        #     template: promote-to-dev
+
+    - name: clone
+      inputs:
+        parameters:
+          - name: repo
+          - name: branch
+      container:
+        resources:
+          limits:
+            cpu: 100m
+            memory: 512Mi
+          requests:
+            cpu: 50m
+            memory: 256Mi
+        volumeMounts:
+          - mountPath: /mnt/vol
+            name: work
+        image: alpine/git:v2.26.2
+        workingDir: /mnt/vol
+        args:
+          - clone
+          - --depth
+          - "1"
+          - --branch
+          - "{{inputs.parameters.branch}}"
+          - --single-branch
+          - "{{inputs.parameters.repo}}"
+          - .
+
+    # - name: promote-to-dev
+    #   container:
+    #     resources:
+    #       limits:
+    #         cpu: 100m
+    #         memory: 512Mi
+    #       requests:
+    #         cpu: 50m
+    #         memory: 256Mi
+    #     image: openshift/origin-cli:latest
+    #     command: [sh, -c]
+    #     args: ['oc process -f /mnt/vol/openshift/db-secrets.yaml | oc apply -f -']
+    #     volumeMounts:
+    #       - name: work
+    #         mountPath: /mnt/vol
