@@ -1,0 +1,7 @@
+*output/
+setenv-prod.sh
+*processed/
+*licenses/
+vars-local.yaml
+*node_modules/
+*.nvm/
