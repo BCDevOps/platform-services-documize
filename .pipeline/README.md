@@ -8,19 +8,19 @@ Where:
 
 # Deploy to DEV
 ```
-( cd "$(git rev-parse --show-toplevel)/apps/documize/.pipeline" && npm run deploy -- --pr=0 --env=dev )
+( cd "$(git rev-parse --show-toplevel)/.pipeline" && npm run deploy -- --pr=0 --env=dev )
 ```
 
 # Deploy to PROD
 ```
-( cd "$(git rev-parse --show-toplevel)/apps/documize/.pipeline" && npm run deploy -- --pr=0 --env=prod )
+( cd "$(git rev-parse --show-toplevel)/.pipeline" && npm run deploy -- --pr=0 --env=prod )
 ```
 
 # Clean
 The clean script can run against each persistent environment, starting from `build`.
 ```
-( cd "$(git rev-parse --show-toplevel)/apps/documize/.pipeline" && npm run clean -- --pr=0 --env=build )
-( cd "$(git rev-parse --show-toplevel)/apps/documize/.pipeline" && npm run clean -- --pr=0 --env=dev )
+( cd "$(git rev-parse --show-toplevel)/.pipeline" && npm run clean -- --pr=0 --env=build )
+( cd "$(git rev-parse --show-toplevel)/.pipeline" && npm run clean -- --pr=0 --env=dev )
 ```
 
 *Warning*: Do *NOT* run against `test` or `prod`. It will cause *PERMANENT* deletion of all objects including `PVC`! be warned!
