@@ -40,7 +40,7 @@ objects:
     creationTimestamp: null
     labels:
       cluster-name: ${NAME}${SUFFIX}
-      app: ${NAME}
+      app: ${NAME}${SUFFIX}
     name: ${NAME}-master${SUFFIX}
   spec:
     ports:
@@ -62,7 +62,7 @@ objects:
     generation: 3
     labels:
       cluster-name: ${NAME}${SUFFIX}
-      app: ${NAME}
+      app: ${NAME}${SUFFIX}
     name: ${NAME}${SUFFIX}
   spec:
     podManagementPolicy: OrderedReady
@@ -226,12 +226,14 @@ objects:
   metadata:
     labels:
       cluster-name: ${NAME}${SUFFIX}
+      app: ${NAME}${SUFFIX}
     name: ${NAME}${SUFFIX}
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: Role
   metadata:
     labels:
       cluster-name: ${NAME}${SUFFIX}
+      app: ${NAME}${SUFFIX}
     name: ${NAME}${SUFFIX}
   rules:
   - apiGroups:
@@ -285,6 +287,7 @@ objects:
   metadata:
     labels:
       cluster-name: ${NAME}${SUFFIX}
+      app: ${NAME}${SUFFIX}
     name: ${NAME}${SUFFIX}
   roleRef:
     apiGroup: rbac.authorization.k8s.io
@@ -298,8 +301,11 @@ parameters:
   displayName: Application Name
   name: NAME
   value: patroni
-- name: SUFFIX
-  description: A suffix appended to all artifact's name (NAME)
+- description: A name suffix used for all objects
+  displayName: Suffix
+  name: SUFFIX
+  required: false
+  value: -dev
 - description: Starting amount of CPU the container can use.
   displayName: CPU REQUEST
   name: CPU_REQUEST

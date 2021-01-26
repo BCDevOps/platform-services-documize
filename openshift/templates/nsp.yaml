@@ -27,7 +27,7 @@ objects:
     metadata:
       name: db-to-db
       labels:
-        app: ${NAME}
+        app: ${NAME}${SUFFIX}
     spec:
       description: |
         allow patroni pods to talk to one another for
@@ -44,6 +44,11 @@ parameters:
     name: NAME
     required: true
     value: documize
+  - description: A name suffix used for all objects
+    displayName: Suffix
+    name: SUFFIX
+    required: false
+    value: -dev
   - name: NAMESPACE
     description: |
       The name of the namespace the policy is being
