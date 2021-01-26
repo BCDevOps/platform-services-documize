@@ -85,11 +85,11 @@ parameters:
   name: SOURCE_REPOSITORY_REF
   required: true
   value: ''
-# - description: SOURCE_REPOSITORY_DIR
-#   displayName: SOURCE_REPOSITORY_DIR
-#   name: SOURCE_REPOSITORY_DIR
-#   required: true
-#   value: apps/documize
+- description: SOURCE_REPOSITORY_DIR
+  displayName: SOURCE_REPOSITORY_DIR
+  name: SOURCE_REPOSITORY_DIR
+  required: true
+  value: '.'
 - description: ALPINE_VERSION
   displayName: ALPINE_VERSION
   name: ALPINE_VERSION
