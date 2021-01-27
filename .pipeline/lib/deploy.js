@@ -16,7 +16,7 @@ module.exports = settings => {
   //Secrets for Patroni
   //First call will create/generate default values and a template
   oc.createIfMissing(
-    oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yaml`, {
+    oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yml`, {
       param: {
         NAME: `template.${phases[phase].name}-patroni`,
         SUFFIX: phases[phase].suffix,
@@ -28,7 +28,7 @@ module.exports = settings => {
 
   //Second call will create the required object using their respective template (default ones generated above)
   objects = objects.concat(
-    oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yaml`, {
+    oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yml`, {
       param: {
         NAME: `${phases[phase].name}-patroni`,
         SUFFIX: phases[phase].suffix,
