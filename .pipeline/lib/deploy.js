@@ -19,7 +19,7 @@ module.exports = settings => {
     oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yaml`, {
       param: {
         NAME: `template.${phases[phase].name}-patroni`,
-        SUFFIX: '',
+        SUFFIX: phases[phase].suffix,
         APP_DB_USERNAME: 'documize',
         APP_DB_NAME: 'documize',
       },
@@ -44,9 +44,14 @@ module.exports = settings => {
   objects = objects.concat(
     oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-deploy.yml`, {
       param: {
-        NAME: `${phases[phase].name}-patroni`,
+        NAME: 'patroni',
         SECRET_NAME: `${phases[phase].name}-patroni`,
         SUFFIX: phases[phase].suffix,
+        CPU_REQUEST: '500m',
+        CPU_LIMIT: '700m',
+        MEMORY_REQUEST: '512Mi',
+        MEMORY_LIMIT: '1Gi'
+
       },
     }),
   );
