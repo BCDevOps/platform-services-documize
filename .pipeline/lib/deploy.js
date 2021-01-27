@@ -18,7 +18,7 @@ module.exports = settings => {
   oc.createIfMissing(
     oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yml`, {
       param: {
-        NAME: `template-patroni`,
+        NAME: `template.${phases[phase].name}-patroni`,
         SUFFIX: phases[phase].suffix,
         APP_DB_USERNAME: 'documize',
         APP_DB_NAME: 'documize',
