@@ -18,7 +18,7 @@ module.exports = settings => {
   oc.createIfMissing(
     oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yml`, {
       param: {
-        NAME: `template.${phases[phase].name}-patroni`,
+        NAME: `template-patroni`,
         SUFFIX: phases[phase].suffix,
         APP_DB_USERNAME: 'documize',
         APP_DB_NAME: 'documize',
@@ -30,7 +30,7 @@ module.exports = settings => {
   objects = objects.concat(
     oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yml`, {
       param: {
-        NAME: `${phases[phase].name}-patroni`,
+        NAME: `patroni`,
         SUFFIX: phases[phase].suffix,
         APP_DB_USERNAME: 'documize',
         APP_DB_NAME: 'documize',
@@ -45,7 +45,7 @@ module.exports = settings => {
     oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-deploy.yml`, {
       param: {
         NAME: 'patroni',
-        SECRET_NAME: `${phases[phase].name}-patroni`,
+        SECRET_NAME: `patroni-${phases[phase].suffix}`,
         SUFFIX: phases[phase].suffix,
         CPU_REQUEST: '500m',
         CPU_LIMIT: '700m',
