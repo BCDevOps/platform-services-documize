@@ -50,8 +50,8 @@ const phases = {
     instance: `${name}-prod`,
     version: `${version}`,
     tag: `prod-${version}`,
-    appHost: `docs.gov.bc.ca`,
-    apiHost: `api-documize.gov.bc.ca`,
+    appHost: `docs.developer.gov.bc.ca`,
+    apiHost: `api-documize.docs.developer.gov.bc.ca`,
   },
 };
 
