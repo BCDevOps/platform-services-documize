@@ -24,8 +24,8 @@ const phases = {
     instance: `${name}-dev-${changeId}`,
     version: `${version}-${changeId}`,
     tag: `dev-${version}-${changeId}`,
-    appHost: `docs-dev-${changeId}.pathfinder.gov.bc.ca`,
-    apiHost: `api-101ed4-dev-${changeId}.pathfinder.gov.bc.ca`,
+    appHost: `docs-dev-${changeId}.apps.silver.devops.gov.bc.ca`,
+    apiHost: `api-101ed4-dev-${changeId}.apps.silver.devops.gov.bc.ca`,
   },
   test: {
     namespace: '101ed4-test',
@@ -36,8 +36,8 @@ const phases = {
     instance: `${name}-test`,
     version: `${version}`,
     tag: `test-${version}`,
-    appHost: `docs-test.pathfinder.gov.bc.ca`,
-    apiHost: `api-documize-test.pathfinder.gov.bc.ca`,
+    appHost: `docs-test.apps.silver.devops.gov.bc.ca`,
+    apiHost: `api-documize-test.apps.silver.devops.gov.bc.ca`,
     // appHost: `docs-test-${changeId}.pathfinder.gov.bc.ca`,
     // apiHost: `api-documize-test-${changeId}.pathfinder.gov.bc.ca`,
   },
@@ -50,8 +50,8 @@ const phases = {
     instance: `${name}-prod`,
     version: `${version}`,
     tag: `prod-${version}`,
-    appHost: `docs.pathfinder.gov.bc.ca`,
-    apiHost: `api-documize.pathfinder.gov.bc.ca`,
+    appHost: `docs.gov.bc.ca`,
+    apiHost: `api-documize.gov.bc.ca`,
   },
 };
 
