@@ -1,0 +1,34 @@
+# Create DB - patroni statefulset based on oc template
+# vars needed:
+# - NAMESPACE
+# - SUFFIX
+# - DB_NAME
+# - SECRET_NAME
+---
+  - hosts: localhost
+    gather_facts: no
+    vars_files:
+      - group_vars/all/vars.yml
+    tasks:
+    - name: Get existing statefulset (ignore not found)
+      shell: |
+        oc -n {{ NAMESPACE }} get statefulset {{ DB_NAME }}{{ SUFFIX }}
+      register: existing_statefulset
+      ignore_errors: true
+
+    # TODO: no pause for pipeline integration
+    - pause:
+        prompt: "There is a statefulset existing already, do you want to continue? (yes/no)"
+      register: statefulset_continue_confirmed
+      when: existing_statefulset.stdout_lines | length > 0
+
+    - name: Create statefulset from template
+      shell: | 
+        oc -n {{ NAMESPACE }} process -f ../templates/db-deploy.yaml \
+        -p NAME={{ DB_NAME }} \
+        -p SUFFIX={{ SUFFIX }} \
+        -p IMAGE_STREAM_NAMESPACE={{ DB_IMAGE_STREAM_NAMESPACE }} \
+        -p IMAGE_STREAM_TAG={{ DB_IMAGE_STREAM_TAG }} \
+        -p SECRET_NAME={{ DB_SECRET_NAME }} | \
+        oc -n {{ NAMESPACE }} apply -f -
+      when: existing_statefulset.stdout_lines | length <= 0 or statefulset_continue_confirmed.user_input == "yes"

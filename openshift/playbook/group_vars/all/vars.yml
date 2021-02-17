@@ -5,10 +5,14 @@ NAMESPACE: 101ed4-{{ env }}
 NAME: documize
 SUFFIX: -{{ env }}
 
-# create db secret from template
+# DB statefulset
 DB_NAME: documize-patroni
+DB_SECRET_NAME: documize-patroni
+DB_IMAGE_STREAM_NAMESPACE: bcgov
+DB_IMAGE_STREAM_TAG: patroni-postgres:12.4-latest
+
+# create db secret from template
 TEMPLATE_SECRET_NAME: template.documize-patroni
-SECRET_NAME: documize-patroni
 
 # create route with ssl cert:
 SSL_CERT_SECRET_NAME:
