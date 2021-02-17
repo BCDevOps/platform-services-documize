@@ -1,0 +1,11 @@
+# Vars for running ansible playbooks
+---
+# app vars:
+NAMESPACE: 101ed4-<env>
+NAME: documize
+SUFFIX: -<env>
+
+# create db secret from template
+DB_NAME: documize-patroni
+TEMPLATE_SECRET_NAME: template.documize-patroni
+SECRET_NAME: documize-patroni
