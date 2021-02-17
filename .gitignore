@@ -1,5 +1,2 @@
 # for ops playbook
 output*
-openshift/playbook/group_vars/all/vars.dev.yml
-openshift/playbook/group_vars/all/vars.test.yml
-openshift/playbook/group_vars/all/vars.prod.yml
