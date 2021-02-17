@@ -1,4 +1,5 @@
 ## Ansible Playbook for Operation Automation
+This is to be used in Argo pipeline.
 
 ## Usage
 - Ensure you or your service account is logged into your cluster of choice
