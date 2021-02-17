@@ -1,2 +1,5 @@
 # for ops playbook
 output*
+
+# for backup container helm chart
+tmp-config-*
