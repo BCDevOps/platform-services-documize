@@ -15,7 +15,7 @@ Use the original backup container oc templates here: https://github.com/BCDevOps
 oc project <namespace>_tools
 
 # build using the json template
-curl https://raw.githubusercontent.com/BCDevOps/backup-container/master/openshift/templates/backup/backup-build.json | oc process -f - | oc apply -f -
+curl https://raw.githubusercontent.com/BCDevOps/backup-container/master/openshift/templates/backup/backup-build.yaml | oc process -f - | oc apply -f -
 
 # once the image is build, make sure to tag it for each environment
 oc tag <is_name>:latest <is_name>:<env>
