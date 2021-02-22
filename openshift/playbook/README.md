@@ -9,6 +9,9 @@ This is to be used in Argo pipeline.
 ## Run
 ```shell
 # <env>: tools / dev / test / prod
+# - create network policies from oc template
+ansible-playbook knps.yml -e env=<env>
+
 # - create DB secret from template for correct matching of existing DB data
 ansible-playbook db-secrets.yml -e env=<env>
 
