@@ -29,6 +29,10 @@
         -p SUFFIX={{ SUFFIX }} \
         -p IMAGE_STREAM_NAMESPACE={{ DB_IMAGE_STREAM_NAMESPACE }} \
         -p IMAGE_STREAM_TAG={{ DB_IMAGE_STREAM_TAG }} \
-        -p SECRET_NAME={{ DB_SECRET_NAME }} | \
+        -p SECRET_NAME={{ DB_SECRET_NAME }} \
+        -p MEMORY_REQUEST={{ QUOTAS[env].MEMORY_REQUEST }} \
+        -p MEMORY_LIMIT={{ QUOTAS[env].MEMORY_LIMIT }} \
+        -p CPU_REQUEST={{ QUOTAS[env].CPU_REQUEST }} \
+        -p CPU_LIMIT={{ QUOTAS[env].CPU_LIMIT }} | \
         oc -n {{ NAMESPACE }} apply -f -
       when: existing_statefulset.stdout_lines | length <= 0 or statefulset_continue_confirmed.user_input == "yes"

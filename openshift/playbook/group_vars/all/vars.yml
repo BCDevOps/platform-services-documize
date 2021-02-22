@@ -18,3 +18,22 @@ TEMPLATE_SECRET_NAME: template.documize-patroni
 SSL_CERT_SECRET_NAME:
 ROUTE_URL:
 SVC_NAME:
+
+QUOTAS:
+  dev:
+    MEMORY_REQUEST: "128Mi"
+    MEMORY_LIMIT: "384Mi"
+    CPU_REQUEST: "80m"
+    CPU_LIMIT: 1
+
+  test:
+    MEMORY_REQUEST: "128Mi"
+    MEMORY_LIMIT: "384Mi"
+    CPU_REQUEST: "80m"
+    CPU_LIMIT: 1
+
+  prod:
+    MEMORY_REQUEST: "128Mi"
+    MEMORY_LIMIT: "384Mi"
+    CPU_REQUEST: "80m"
+    CPU_LIMIT: 1
