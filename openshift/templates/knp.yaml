@@ -89,7 +89,7 @@ objects:
         - from:
             - podSelector:
                 matchLabels:
-                  app.kubernetes.io/name: ${BACKUP_APP_NAME}
+                  app.kubernetes.io/name: ${BACKUP_IDENTIFIER}
           ports:
             - protocol: TCP
               port: 5432
@@ -135,9 +135,8 @@ parameters:
       deployed to
     required: true
     value: 101ed4-dev
-  - name: BACKUP_APP_NAME
+  - name: BACKUP_IDENTIFIER
     description: |
-      The name being used when installing backup app thru
-      helm chart
+      Used by network policy to identify backup-storage pod
     required: true
     value: backup-storage
