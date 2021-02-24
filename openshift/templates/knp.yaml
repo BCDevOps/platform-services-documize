@@ -74,6 +74,27 @@ objects:
               port: 5432
       policyTypes:
         - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-backup-to-db
+      labels:
+        app: ${NAME}${SUFFIX}
+    spec:
+      # Allow backup container to talk to patroni pods
+      podSelector:
+        matchLabels:
+          statefulset: ${NAME}-patroni${SUFFIX}
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: ${BACKUP_APP_NAME}
+          ports:
+            - protocol: TCP
+              port: 5432
+      policyTypes:
+        - Ingress
   # TODO: remove aporeto nsp
   - apiVersion: security.devops.gov.bc.ca/v1alpha1
     kind: NetworkSecurityPolicy
@@ -111,6 +132,12 @@ parameters:
   - name: NAMESPACE
     description: |
       The name of the namespace the policy is being
-      deployed to.
+      deployed to
     required: true
     value: 101ed4-dev
+  - name: BACKUP_APP_NAME
+    description: |
+      The name being used when installing backup app thru
+      helm chart
+    required: true
+    value: backup-storage

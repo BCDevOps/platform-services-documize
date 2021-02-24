@@ -14,5 +14,6 @@
         oc -n {{ NAMESPACE }} process -f ../templates/knp.yaml \
         -p NAME={{ NAME }} \
         -p SUFFIX={{ SUFFIX }} \
+        -p BACKUP_APP_NAME={{ BACKUP_APP_NAME }} \
         -p NAMESPACE={{ NAMESPACE }} | \
         oc -n {{ NAMESPACE }} apply -f -

@@ -37,3 +37,5 @@ QUOTAS:
     MEMORY_LIMIT: "384Mi"
     CPU_REQUEST: "80m"
     CPU_LIMIT: 1
+
+BACKUP_APP_NAME: backup-storage
