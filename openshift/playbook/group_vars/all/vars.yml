@@ -25,17 +25,20 @@ QUOTAS:
     MEMORY_LIMIT: "384Mi"
     CPU_REQUEST: "80m"
     CPU_LIMIT: 1
+    PVC_SIZE: "1Gi"
 
   test:
     MEMORY_REQUEST: "128Mi"
     MEMORY_LIMIT: "384Mi"
     CPU_REQUEST: "80m"
     CPU_LIMIT: 1
+    PVC_SIZE: "1Gi"
 
   prod:
-    MEMORY_REQUEST: "128Mi"
-    MEMORY_LIMIT: "384Mi"
-    CPU_REQUEST: "80m"
+    MEMORY_REQUEST: "1Gi"
+    MEMORY_LIMIT: "2Gi"
+    CPU_REQUEST: "500m"
     CPU_LIMIT: 1
+    PVC_SIZE: "3Gi"
 
 BACKUP_IDENTIFIER: backup-storage

@@ -33,6 +33,7 @@
         -p MEMORY_REQUEST={{ QUOTAS[env].MEMORY_REQUEST }} \
         -p MEMORY_LIMIT={{ QUOTAS[env].MEMORY_LIMIT }} \
         -p CPU_REQUEST={{ QUOTAS[env].CPU_REQUEST }} \
-        -p CPU_LIMIT={{ QUOTAS[env].CPU_LIMIT }} | \
+        -p CPU_LIMIT={{ QUOTAS[env].CPU_LIMIT }} \
+        -p PVC_SIZE={{ QUOTAS[env].PVC_SIZE }} | \
         oc -n {{ NAMESPACE }} apply -f -
       when: existing_statefulset.stdout_lines | length <= 0 or statefulset_continue_confirmed.user_input == "yes"
