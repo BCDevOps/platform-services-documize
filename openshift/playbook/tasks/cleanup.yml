@@ -1,0 +1,10 @@
+---
+# Delete a set of components based on label
+# - not including PVC
+
+# Vars:
+# - TARGET_NAMESPACE
+# - COMPONENT_LABEL: the label to search for all components
+
+- name: "Delete components based on the label {{ COMPONENT_LABEL }}"
+  shell: "oc -n {{ TARGET_NAMESPACE }} delete all,configmap,secret -l {{ COMPONENT_LABEL }}"
