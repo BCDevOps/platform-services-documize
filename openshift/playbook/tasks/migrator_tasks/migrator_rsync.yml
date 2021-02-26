@@ -1,0 +1,42 @@
+---
+# get source cluster migrator pod:
+- name: Login to Source Cluster
+  shell: oc config use-context {{ migrator_vars.cluster_source.context }}
+
+- name: Get Source Cluster Migrator Pod Name
+  shell: | 
+    oc -n {{ migrator_vars.cluster_source.namespace }} get pods -o name | 
+    grep '{{ migrator_vars.cluster_source.migrator.name }}-{{ migrator_vars.cluster_source.name }}' |
+    awk '{print $1}'
+  register: oc_output
+
+- name: setting Source Cluster pod name
+  set_fact:
+    CLUSTER_SOURCE_MIGRATOR_POD: "{{ oc_output.stdout.split('/')[1] }}"
+
+# get target cluster migrator pod:
+- name: Login to Target Cluster
+  shell: oc config use-context {{ migrator_vars.cluster_target.context }}
+
+- name: Get Target Cluster Migrator Pod Name
+  shell: | 
+    oc -n {{ migrator_vars.cluster_target.namespace }} get pods -o name | 
+    grep '{{ migrator_vars.cluster_target.migrator.name }}-{{ migrator_vars.cluster_target.name }}' |
+    awk '{print $1}'
+  register: oc_b_output
+
+- name: setting Target Cluster pod name
+  set_fact:
+    CLUSTER_TARGET_MIGRATOR_POD: "{{ oc_b_output.stdout.split('/')[1] }}"
+
+# rsync from source cluster migrator pod:
+- name: Login to Source Cluster
+  shell: oc config use-context {{ migrator_vars.cluster_source.context }}
+
+- name: Rsync from source to target
+  shell: | 
+    oc -n {{ migrator_vars.cluster_source.namespace }} exec {{ CLUSTER_SOURCE_MIGRATOR_POD }} -- bash -c \
+    "
+      cd /source
+      oc rsync --no-perms --kubeconfig=/target/tkube/KUBECONFIG . {{ CLUSTER_TARGET_MIGRATOR_POD }}:/target
+    "

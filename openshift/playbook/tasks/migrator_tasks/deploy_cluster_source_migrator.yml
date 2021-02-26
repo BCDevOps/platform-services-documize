@@ -1,0 +1,43 @@
+---
+- name: Create Target Cluster service account token secret in Source Cluster 
+  shell: oc apply -f {{ CLUSTER_TARGET_SA_SECRET }} -n {{ migrator_vars.cluster_source.namespace }}
+
+- name: Delete Temp Secret file 
+  ansible.builtin.file:
+    path: "{{ CLUSTER_TARGET_SA_SECRET }}"
+    state: absent
+  when: CLUSTER_TARGET_SA_SECRET is defined
+
+- name: Checking if migrator image exists
+  shell: oc get -n {{ migrator_vars.cluster_source.migrator.namespace }} imagestreamtag {{ migrator_vars.cluster_source.migrator.name }}:{{ migrator_vars.cluster_source.migrator.tag }} 
+  register: imagestreamtag
+  ignore_errors: yes 
+
+- name: Building migrator image in {{ migrator_vars.cluster_source.migrator.namespace }}
+  shell: |
+    curl https://raw.githubusercontent.com/BCDevOps/StorageMigration/master/openshift/templates/pvc-migrator-build.yaml |
+    oc process -f - -n {{ migrator_vars.cluster_source.migrator.namespace }} |
+    oc apply -f - -n {{ migrator_vars.cluster_source.migrator.namespace }}
+  when: imagestreamtag.stdout in 'NotFound'
+
+- name: Deploying Migrator Image
+  shell: |
+    curl https://raw.githubusercontent.com/BCDevOps/StorageMigration/master/cross-cluster/source-migrator-tmpl.yaml |
+    oc process -f - -n {{ migrator_vars.cluster_source.namespace }} \
+    -p SOURCE_PVC={{ migrator_vars.cluster_source.pvc }} \
+    -p REMOTE_CLUSTER={{ migrator_vars.cluster_target.server_url }} \
+    -p REMOTE_PROJECT={{ migrator_vars.cluster_target.namespace }} \
+    -p REMOTE_SECRET={{ CLUSTER_TARGET_SA_SECRET_NAME }} \
+    -p SRC_IMAGE_NAME={{ migrator_vars.cluster_source.migrator.name }} \ 
+    -p TAG_NAME={{ migrator_vars.cluster_source.migrator.tag }} \  
+    -p SRC_IMAGE_NAMESPACE={{ migrator_vars.cluster_source.migrator.namespace }} \  
+    -p SRC_IMAGE_REGISTRY={{ migrator_vars.cluster_source.image_registry }} \
+    -p NAME={{ migrator_vars.cluster_source.migrator.name }}-{{ migrator_vars.cluster_source.name }} |
+    oc apply -f - -n {{ migrator_vars.cluster_source.namespace }}
+
+- name: Wait for migrator pod to be ready
+  include_tasks: ../wait_for_scale_up.yml
+  vars:
+    TARGET_NAMESPACE: "{{ migrator_vars.cluster_source.namespace }}"
+    COMPONENT_TYPE: Deployment
+    COMPONENT_NAME: "{{ migrator_vars.cluster_source.migrator.name }}-{{ migrator_vars.cluster_source.name }}"
