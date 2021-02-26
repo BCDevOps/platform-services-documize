@@ -27,7 +27,7 @@ env:
   DATABASE_SERVICE_NAME:
     value: <db_service_name>
   ENVIRONMENT_FRIENDLY_NAME:
-    value: "SSO <env> DB Backups"
+    value: "Documize <env> DB Backups"
   ENVIRONMENT_NAME:
     value: "<env>"
   WEBHOOK_URL:
