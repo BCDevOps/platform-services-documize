@@ -1,0 +1,138 @@
+# STATE SYNC:
+# - Makes a copy of Backup-Container's Persistent Volume from Source Cluster to Target Cluster
+# - Uses the migrator deployment from https://github.com/BCDevOps/StorageMigration
+
+# Pre-requisites:
+# - login user has EDIT access in both clusters
+# - Backup-Container is running in both clusters
+# - user logged in both clusters
+
+# Vars:
+# - should be all set in group_vars/all/vars_migrator.yml
+# - note that everything is set per OCP cluster: source and target
+
+# NOTES:
+# Please note that most actions are done in both clusters, there are alter cluster login for each step
+
+---
+  - hosts: localhost
+    gather_facts: no
+    vars_files:
+      - group_vars/all/vars_migrator.yml
+    tasks:
+      # ======================== check logins for both clusters ========================================
+      - name: "Checking logged into this cluster: {{ migrator_vars.cluster_source.server_url }}"
+        shell: |
+          oc config use-context {{ migrator_vars.cluster_source.context }}
+          oc whoami
+        register: source_login
+        failed_when: source_login.stdout in 'Forbidden'
+
+      - name: "Checking logged into this cluster: {{ migrator_vars.cluster_target.server_url }}"
+        shell: |
+          oc config use-context {{ migrator_vars.cluster_target.context }}
+          oc whoami
+        register: source_login
+        failed_when: source_login.stdout in 'Forbidden'
+
+      # ======================== scale down Backup-Container ========================================
+      - name: Login to Source Cluster
+        shell: oc config use-context {{ migrator_vars.cluster_source.context }}
+
+      # TODO: backup route content and delete route
+
+      - name: Scale down OCP3 Documize DC
+        include_tasks: ./tasks/scale_component.yml
+        vars:
+          TARGET_NAMESPACE: "{{ migrator_vars.cluster_source.namespace }}"
+          COMPONENT_TYPE: "{{ migrator_vars.cluster_source.dc.type }}"
+          COMPONENT_NAME: "{{ migrator_vars.cluster_source.dc.name }}"
+          DESIRED_STATE: "0"
+
+      - pause:
+          prompt: "Time to take a DB backup! ONLY continue when it is COMPLETED !!!"
+
+      # PVC is RWO mode!
+      - name: Scale down OCP3 Backup-Container to prepare for migrator
+        include_tasks: ./tasks/scale_component.yml
+        vars:
+          TARGET_NAMESPACE: "{{ migrator_vars.cluster_source.namespace }}"
+          COMPONENT_TYPE: "{{ migrator_vars.cluster_source.backup.type }}"
+          COMPONENT_NAME: "{{ migrator_vars.cluster_source.backup.name }}"
+          DESIRED_STATE: "0"
+
+      - name: Login to Target Cluster
+        shell: oc config use-context {{ migrator_vars.cluster_target.context }}
+
+      - name: Scale down OCP4 Backup-Container to prepare for migrator
+        include_tasks: ./tasks/scale_component.yml
+        vars:
+          TARGET_NAMESPACE: "{{ migrator_vars.cluster_target.namespace }}"
+          COMPONENT_TYPE: "{{ migrator_vars.cluster_target.backup.type }}"
+          COMPONENT_NAME: "{{ migrator_vars.cluster_target.backup.name }}"
+          DESIRED_STATE: "0"
+
+      # ======================== deploy migrator and rsync data over ========================================
+      - name: Login to Target Cluster
+        shell: oc config use-context {{ migrator_vars.cluster_target.context }}
+
+      - name: Deploying Source Migrator to Target Cluster
+        include_tasks: ./tasks/migrator_tasks/deploy_cluster_target_migrator.yml
+
+      - name: Login to Source Cluster
+        shell: oc config use-context {{ migrator_vars.cluster_source.context }}
+
+      - name: Deploying Source Migrator to Source Cluster
+        include_tasks: ./tasks/migrator_tasks/deploy_cluster_source_migrator.yml
+
+      - name: Rsync the data between Source Cluster and Target Cluster Migrator Pods
+        include_tasks: ./tasks/migrator_tasks/migrator_rsync.yml
+
+      # ======================== clean up ========================================
+
+      - name: Login to Source Cluster
+        shell: oc config use-context {{ migrator_vars.cluster_source.context }}
+
+      - name: Delete migrator components
+        include_tasks: ./tasks/cleanup.yml
+        vars:
+          TARGET_NAMESPACE: "{{ migrator_vars.cluster_source.namespace }}"
+          COMPONENT_LABEL: "app={{ migrator_vars.cluster_source.migrator.name }}-{{ migrator_vars.cluster_source.name }}"
+
+      - name: Login to Target Cluster
+        shell: oc config use-context {{ migrator_vars.cluster_target.context }}
+
+      - name: Delete migrator components
+        include_tasks: ./tasks/cleanup.yml
+        vars:
+          TARGET_NAMESPACE: "{{ migrator_vars.cluster_target.namespace }}"
+          COMPONENT_LABEL: "app={{ migrator_vars.cluster_target.migrator.name }}-{{ migrator_vars.cluster_target.name }}"
+
+      # ======================== bring up Backup-Container ========================================
+
+      - name: Scale up Backup-Container in OCP4
+        include_tasks: ./tasks/scale_component.yml
+        vars:
+          TARGET_NAMESPACE: "{{ migrator_vars.cluster_target.namespace }}"
+          COMPONENT_TYPE: "{{ migrator_vars.cluster_target.backup.type }}"
+          COMPONENT_NAME: "{{ migrator_vars.cluster_target.backup.name }}"
+          DESIRED_STATE: "1"
+
+      - name: Scale down ocp4 Documize DC
+        include_tasks: ./tasks/scale_component.yml
+        vars:
+          TARGET_NAMESPACE: "{{ migrator_vars.cluster_target.namespace }}"
+          COMPONENT_TYPE: "{{ migrator_vars.cluster_target.dc.type }}"
+          COMPONENT_NAME: "{{ migrator_vars.cluster_target.dc.name }}"
+          DESIRED_STATE: "0"
+
+      - pause:
+          prompt: "Time to restore the DB backup on target space! ONLY continue when it is COMPLETED !!!"
+
+      - name: Scale up ocp4 Documize DC
+        include_tasks: ./tasks/scale_component.yml
+        vars:
+          TARGET_NAMESPACE: "{{ migrator_vars.cluster_target.namespace }}"
+          COMPONENT_TYPE: "{{ migrator_vars.cluster_target.dc.type }}"
+          COMPONENT_NAME: "{{ migrator_vars.cluster_target.dc.name }}"
+          DESIRED_STATE: "1"
