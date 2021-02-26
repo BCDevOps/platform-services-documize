@@ -1,0 +1,49 @@
+---
+# vars particular to the state_sync playbook
+migrator_vars:
+  # ------------ Source Cluster ------------
+  cluster_source:
+    # cluster info:
+    name: pathfinder
+    server_url: https://console.pathfinder.gov.bc.ca:8443
+    # NOTE: you can find this from `oc config get-contexts`
+    context: hmg6pw-{{ env }}/console-pathfinder-gov-bc-ca:8443/{{ source_oc_account }}
+    image_registry: docker-registry.default.svc:5000
+    # namespace components:
+    namespace: hmg6pw-{{ env }}
+    pvc: patroni-backup-storage-backup-pvc
+    # NOTE: type: statefulset / deploymentConfig / deployment
+    dc:
+      type: deploymentConfig
+      name: documize-{{ env }}
+    backup:
+      type: deployment
+      name: patroni-backup-storage
+    # PVC migrator image details:
+    migrator: 
+      namespace: hmg6pw-tools
+      type: deployment
+      name: pvc-migrator
+      tag: latest
+  # ------------ Target Cluster ------------
+  cluster_target:
+    # cluster info:
+    name: silver
+    server_url: https://api.silver.devops.gov.bc.ca:6443
+    context: 101ed4-{{ env }}/api-silver-devops-gov-bc-ca:6443/{{ target_oc_account }}
+    image_registry: image-registry.openshift-image-registry.svc:5000
+    # namespace components:
+    namespace: 101ed4-{{ env }}
+    pvc: patroni-backup-storage-backup-pvc
+    dc:
+      type: deploymentConfig
+      name: documize-{{ env }}
+    backup:
+      type: deployment
+      name: patroni-backup-storage
+    # PVC migrator image details:
+    migrator: 
+      namespace: 101ed4-tools
+      type: deployment
+      name: pvc-migrator
+      tag: latest
