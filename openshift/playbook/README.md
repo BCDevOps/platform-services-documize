@@ -17,4 +17,23 @@ ansible-playbook db-secrets.yml -e env=<env>
 
 # - create statefulset for patroni DB from oc template
 ansible-playbook db-deploy.yml -e env=<env>
+
+# - cross-cluster DB data migration
+ansible-playbook db_state_sync.yml -e env=<env> -e source_oc_account=ShellyXueHan -e target_oc_account=shellyxuehan@github
+# NOTE: Run the following manual backup/restore steps until we have it automated:
+# - Backup dump in ocp3:
+oc rsh <backup_pod>
+> ./backup.sh -1
+> exit
+
+# - Backup estore in ocp4:
+oc rsh <backup_pod>
+# -- find the target backup file:
+> ./backup.sh -l
+# -- find the db connection string:
+> ./backup.sh -c
+# -- run restore:
+> ./backup.sh -r documize-patroni-master-dev:5432/documize
+
+# NOTE: you will need to find the super user secret from db secret!
 ```
