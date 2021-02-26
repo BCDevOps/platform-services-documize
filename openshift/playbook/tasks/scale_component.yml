@@ -1,0 +1,20 @@
+---
+# Scale a component to reach the desired set of replicas, and wait
+
+# Vars:
+# - TARGET_NAMESPACE
+# - COMPONENT_TYPE: type of component (value should be: statefulset / deploymentConfig / deployment)
+# - COMPONENT_NAME: name of the component
+# - DESIRED_STATE: number of replicas expected
+
+
+- name: Scaling component {{ COMPONENT_TYPE }}/{{ COMPONENT_NAME }} to {{ DESIRED_STATE }} Pod
+  shell: oc -n {{ TARGET_NAMESPACE }} scale {{ COMPONENT_TYPE }}/{{ COMPONENT_NAME }} --replicas={{ DESIRED_STATE }}
+
+- name: check for scaling complete
+  include_tasks: ./tasks/wait_for_scale_up.yml
+  when: DESIRED_STATE|int > 0
+
+- name: check for scaling complete
+  include_tasks: ./tasks/wait_for_scale_down.yml
+  when: DESIRED_STATE|int == 0
