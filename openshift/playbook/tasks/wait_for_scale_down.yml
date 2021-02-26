@@ -1,0 +1,40 @@
+---
+# Waits for a statefulset/deploymentConfig/deployment to scale down to 0
+
+# Vars:
+# TARGET_NAMESPACE: string
+# COMPONENT_TYPE: string
+# COMPONENT_NAME: string
+# DELAY: number
+
+# ====== scaling down to 0 ===============
+- name: Get pod selector label from {{ COMPONENT_TYPE }} {{ COMPONENT_NAME }}
+  shell: oc -n {{ TARGET_NAMESPACE }} get {{ COMPONENT_TYPE }}/{{ COMPONENT_NAME }} -o json
+  register: object_config
+
+- name: Get selector list for deploymentConfig
+  set_fact:
+    pod_selector_list: "{{ (object_config.stdout|from_json).spec.selector }}"
+  when: COMPONENT_TYPE == "deploymentConfig"
+
+- name: Get selector list for {{ COMPONENT_TYPE }}
+  set_fact:
+    pod_selector_list: "{{ (object_config.stdout|from_json).spec.selector.matchLabels }}"
+  when: COMPONENT_TYPE != "deploymentConfig"
+
+- name: Get pod selector value
+  set_fact:
+    pod_selector_key: "{{ (pod_selector_list.keys()|list)[0] }}"
+    pod_selector_value: "{{ pod_selector_list[((pod_selector_list.keys()|list)[0])] }}"
+
+- name: "Wait for POD {{ pod_selector_key }}={{ pod_selector_value }} to be scaled to 0"
+  shell: oc -n {{ TARGET_NAMESPACE }} get pod -l {{ pod_selector_key }}={{ pod_selector_value }} -o name 
+  register: result
+  until: result.stdout_lines|length == 0
+  delay: "{{ DELAY | default(15) }}"
+  retries: 45
+
+- name: Remove configmaps for statefulset to avoid conflicts
+  shell: oc -n {{ TARGET_NAMESPACE }} delete configmap {{ COMPONENT_NAME }}-config {{ COMPONENT_NAME }}-leader 
+  ignore_errors: yes
+  when: COMPONENT_TYPE == "statefulset"
