@@ -1,0 +1,31 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: documize-admin-sudoers
+  namespace: 101ed4-prod
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: caggles@github
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: j-pye@github
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: patricksimonian@github
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: poornima-sivanand@github
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: sbathgate@github
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: shellyxuehan@github
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: yhfreeman@github
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: documize-admin-sudoer

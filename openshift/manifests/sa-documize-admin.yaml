@@ -1,0 +1,5 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: documize-admin
+  namespace: 101ed4-prod

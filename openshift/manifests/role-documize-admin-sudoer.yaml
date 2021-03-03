@@ -1,0 +1,15 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: documize-admin-sudoer
+  namespace: 101ed4-prod
+rules:
+  - verbs:
+      - impersonate
+    apiGroups:
+      - user.openshift.io
+      - ''
+    resources:
+      - serviceaccounts
+    resourceNames:
+      - documize-admin
