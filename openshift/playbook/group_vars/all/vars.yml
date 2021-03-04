@@ -8,7 +8,7 @@ SUFFIX: -{{ env }}
 # DB statefulset
 DB_NAME: documize-patroni
 DB_SECRET_NAME: documize-patroni
-DB_IMAGE_STREAM_NAMESPACE: bcgov
+DB_IMAGE_STREAM_NAMESPACE: 101ed4-tools
 DB_IMAGE_STREAM_TAG: patroni-postgres:12.4-latest
 
 # create db secret from template
