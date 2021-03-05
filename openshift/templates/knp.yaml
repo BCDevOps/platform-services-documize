@@ -1,0 +1,142 @@
+# Copyright 2021 The Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  annotations:
+    description: |
+      The Network Policies (NP) for the associated
+      Platform Services Documize application.
+  name: ${NAME}-knp
+objects:
+  - kind: NetworkPolicy
+    apiVersion: networking.k8s.io/v1
+    metadata:
+      name: deny-by-default
+      labels:
+        app: ${NAME}${SUFFIX}
+    spec:
+      # The default posture for a security first namespace is to
+      # deny all traffic.
+      podSelector: {}
+      ingress: []
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-from-openshift-ingress
+      labels:
+        app: ${NAME}${SUFFIX}
+    spec:
+      # This policy allows any pod with a route & service combination
+      # to accept traffic from the OpenShift router pods. This is
+      # required for things outside of OpenShift (like the Internet)
+      # to reach your pods.
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  network.openshift.io/policy-group: ingress
+      podSelector: {}
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-db-to-db
+      labels:
+        app: ${NAME}${SUFFIX}
+    spec:
+      # Allow patroni pods to talk to one another for
+      # replication etc.
+      podSelector:
+        matchLabels:
+          statefulset: ${NAME}-patroni${SUFFIX}
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  statefulset: ${NAME}-patroni${SUFFIX}
+          ports:
+            - protocol: TCP
+              port: 5432
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-backup-to-db
+      labels:
+        app: ${NAME}${SUFFIX}
+    spec:
+      # Allow backup container to talk to patroni pods
+      podSelector:
+        matchLabels:
+          statefulset: ${NAME}-patroni${SUFFIX}
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: ${BACKUP_IDENTIFIER}
+          ports:
+            - protocol: TCP
+              port: 5432
+      policyTypes:
+        - Ingress
+  # TODO: remove aporeto nsp
+  - apiVersion: security.devops.gov.bc.ca/v1alpha1
+    kind: NetworkSecurityPolicy
+    metadata:
+      name: any-to-any
+    spec:
+      description: |
+        allow all pods to communicate
+      source:
+        - - "$namespace=${NAMESPACE}"
+      destination:
+        - - "$namespace=*"
+  - apiVersion: security.devops.gov.bc.ca/v1alpha1
+    kind: NetworkSecurityPolicy
+    metadata:
+      name: any-to-external
+    spec:
+      description: |
+        Allow all pods to talk to external systems
+      source:
+        - - "$namespace=${NAMESPACE}"
+      destination:
+        - - "ext:network=any"
+parameters:
+  - description: A name used for all objects
+    displayName: Name
+    name: NAME
+    required: true
+    value: documize
+  - description: A name suffix used for all objects
+    displayName: Suffix
+    name: SUFFIX
+    required: true
+    value: -dev
+  - name: NAMESPACE
+    description: |
+      The name of the namespace the policy is being
+      deployed to
+    required: true
+    value: 101ed4-dev
+  - name: BACKUP_IDENTIFIER
+    description: |
+      Used by network policy to identify backup-storage pod
+    required: true
+    value: backup-storage

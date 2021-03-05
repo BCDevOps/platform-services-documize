@@ -1,0 +1,44 @@
+# Vars for running ansible playbooks
+---
+# Vars per env:
+NAMESPACE: 101ed4-{{ env }}
+NAME: documize
+SUFFIX: -{{ env }}
+
+# DB statefulset
+DB_NAME: documize-patroni
+DB_SECRET_NAME: documize-patroni
+DB_IMAGE_STREAM_NAMESPACE: bcgov
+DB_IMAGE_STREAM_TAG: patroni-postgres:12.4-latest
+
+# create db secret from template
+TEMPLATE_SECRET_NAME: template.documize-patroni
+
+# create route with ssl cert:
+SSL_CERT_SECRET_NAME:
+ROUTE_URL:
+SVC_NAME:
+
+QUOTAS:
+  dev:
+    MEMORY_REQUEST: "128Mi"
+    MEMORY_LIMIT: "384Mi"
+    CPU_REQUEST: "80m"
+    CPU_LIMIT: 1
+    PVC_SIZE: "1Gi"
+
+  test:
+    MEMORY_REQUEST: "128Mi"
+    MEMORY_LIMIT: "384Mi"
+    CPU_REQUEST: "80m"
+    CPU_LIMIT: 1
+    PVC_SIZE: "1Gi"
+
+  prod:
+    MEMORY_REQUEST: "1Gi"
+    MEMORY_LIMIT: "2Gi"
+    CPU_REQUEST: "500m"
+    CPU_LIMIT: 1
+    PVC_SIZE: "3Gi"
+
+BACKUP_IDENTIFIER: backup-storage

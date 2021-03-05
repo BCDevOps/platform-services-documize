@@ -1,0 +1,19 @@
+# Create network policies on oc template
+# vars needed:
+# - NAMESPACE
+# - SUFFIX
+# - NAME
+---
+  - hosts: localhost
+    gather_facts: no
+    vars_files:
+      - group_vars/all/vars.yml
+    tasks:
+    - name: Create network policies from template
+      shell: | 
+        oc -n {{ NAMESPACE }} process -f ../templates/knp.yaml \
+        -p NAME={{ NAME }} \
+        -p SUFFIX={{ SUFFIX }} \
+        -p BACKUP_IDENTIFIER={{ BACKUP_IDENTIFIER }} \
+        -p NAMESPACE={{ NAMESPACE }} | \
+        oc -n {{ NAMESPACE }} apply -f -
