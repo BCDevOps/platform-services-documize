@@ -1,0 +1,10 @@
+# vars particular to the maintenance-redirect playbook
+
+# testing in non-prod
+# NAMESPACE: "hmg6pw-dev"
+# SOURCE_HOST_NAME: "docs-dev-546.pathfinder.gov.bc.ca"
+# DESTINATION_HOST_NAME: "docs-dev-1.apps.silver.devops.gov.bc.ca"
+
+NAMESPACE: "hmg6pw-prod"
+SOURCE_HOST_NAME: "docs.pathfinder.gov.bc.ca"
+DESTINATION_HOST_NAME: "docs.developer.gov.bc.ca"

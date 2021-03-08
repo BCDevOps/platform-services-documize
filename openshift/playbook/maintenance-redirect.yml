@@ -1,0 +1,40 @@
+# Create 301 redirect from oc template
+---
+  - hosts: localhost
+    gather_facts: no
+    vars_files:
+      - group_vars/all/vars_redirect.yml
+    tasks:
+    - name: Prep work before creating documize-redirect
+      block:
+      - name: get existing route name
+        shell: |
+          oc -n {{ NAMESPACE }} get route | grep {{ SOURCE_HOST_NAME }} | awk '{print $1}'
+        register: existing_route_name
+
+      - name: Create backup for existing route
+        shell: |
+          touch backup_route.yaml && \
+          oc -n {{ NAMESPACE }} get route/{{ existing_route_name.stdout }} -o yaml > backup_route.yaml
+
+      - name: Delete exisiting sroute
+        shell: |
+          oc -n {{ NAMESPACE }} delete route/{{ existing_route_name.stdout }}
+
+    - name: Create documize-redirect from template
+      shell: |
+        oc -n {{ NAMESPACE }} process -f ../templates/maintenance-redirect.yaml \
+        -p DESTINATION_HOST_NAME={{ DESTINATION_HOST_NAME }} \
+        -p SOURCE_HOST_NAME={{ SOURCE_HOST_NAME }} | \
+        oc -n {{ NAMESPACE }} apply -f - > backup_created_artifacts.yaml
+    
+    - pause:
+        prompt: "Do you want to roll back? (yes/no)"
+      register: rollback_confirmed
+
+    - name: Rollback
+      shell: |
+        cat backup_created_artifacts.yaml | awk '{print $1}' | xargs oc delete && \
+        oc -n {{ NAMESPACE }} apply -f backup_route.yaml && \
+        rm {backup_created_artifacts.yaml,backup_route.yaml}
+      when: rollback_confirmed.user_input == "yes"

@@ -1,0 +1,143 @@
+# Copyright 2021 The Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  annotations:
+    description: |
+      Deployment template for the Documize redirect 301.
+  name: ${NAME}
+objects:
+  - apiVersion: v1
+    kind: Route
+    metadata:
+      labels:
+        app: ${NAME}
+      name: ${NAME}
+    spec:
+      host: ${SOURCE_HOST_NAME}
+      port:
+        targetPort: 5001-tcp
+      tls:
+        termination: edge
+      to:
+        kind: Service
+        name: ${NAME}
+        weight: 100
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: ${NAME}-config
+      labels:
+        app: ${NAME}
+    data:
+      Caddyfile: |
+        http://${SOURCE_HOST_NAME}:5001 {
+          redir https://${DESTINATION_HOST_NAME}{uri}
+        }
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: ${NAME}
+      name: ${NAME}
+    spec:
+      selector:
+        role: redirect
+      ports:
+        - name: 5001-tcp
+          port: 5001
+          protocol: TCP
+          targetPort: 5001
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      labels:
+        app: ${NAME}
+      name: ${NAME}
+    spec:
+      strategy:
+        type: Rolling
+      triggers:
+        - type: ConfigChange
+      replicas: 1
+      selector:
+        role: redirect
+      template:
+        metadata:
+          labels:
+            app: ${NAME}
+            role: redirect
+          name: ${NAME}
+        spec:
+          containers:
+            - name: ${NAME}
+              imagePullPolicy: Always
+              image: "caddy:latest"
+              env:
+                - name: XDG_DATA_HOME
+                  value: /tmp
+              startupProbe:
+                httpGet:
+                  path: /ehlo
+                  port: 5001
+                  scheme: HTTP
+                failureThreshold: 5
+                periodSeconds: 3
+              readinessProbe:
+                httpGet:
+                  path: /ehlo
+                  port: 5001
+                timeoutSeconds: 10
+              ports:
+                - containerPort: 5001
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 92Mi
+                requests:
+                  cpu: 30m
+                  memory: 48Mi
+              volumeMounts:
+                - name: config-vol
+                  mountPath: /etc/caddy/Caddyfile
+                  subPath: Caddyfile
+          volumes:
+            - name: config-vol
+              configMap:
+                name: ${NAME}-config
+          imagePullSecrets:
+            - name: bcdevops-dockercfg
+parameters:
+  - description:
+      The name assigned to all of the objects defined in this template.  You
+      should keep this as default unless your know what your doing.
+    displayName: Name
+    name: NAME
+    required: true
+    value: documize-redirect
+  - name: DESTINATION_HOST_NAME
+    description:
+      The destination address that is being redirected.
+    displayName: Redirect Destination
+    required: true
+    value: docs.developer.gov.bc.ca
+  - name: SOURCE_HOST_NAME
+    description: |
+      The route that will be redirected to the destination URL.
+    displayName: Front Door Route
+    required: true
+    value: docs.pathfinder.gov.bc.ca

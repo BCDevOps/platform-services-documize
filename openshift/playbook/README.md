@@ -18,3 +18,9 @@ ansible-playbook db-secrets.yml -e env=<env>
 # - create statefulset for patroni DB from oc template
 ansible-playbook db-deploy.yml -e env=<env>
 ```
+
+## To create 301 documize-redirect for migration process
+```shell
+# - create 301 redirect from oc template
+ansible-playbook maintenance-redirect.yml
+```
