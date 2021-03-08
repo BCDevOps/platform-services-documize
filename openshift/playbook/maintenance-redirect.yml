@@ -1,11 +1,9 @@
-# Create DB - patroni statefulset based on oc template
-# vars needed:
-# - NAMESPACE
-# - DESTINATION_HOST_NAME
-# - SOURCE_HOST_NAME
+# Create 301 redirect from oc template
 ---
   - hosts: localhost
     gather_facts: no
+    vars_files:
+      - group_vars/all/vars_redirect.yml
     tasks:
     - name: Prep work before creating documize-redirect
       block:

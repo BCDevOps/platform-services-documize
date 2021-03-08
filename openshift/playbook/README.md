@@ -21,10 +21,6 @@ ansible-playbook db-deploy.yml -e env=<env>
 
 ## To create 301 documize-redirect for migration process
 ```shell
-# example for prod:
-# export NAMESPACE=hmg6pw-prod \n
-# export SOURCE_HOST_NAME=docs.pathfinder.gov.bc.ca \n
-# export DESTINATION_HOST_NAME=docs.developer.gov.bc.ca \n
-ansible-playbook maintenance-redirect.yml -e NAMESPACE=${NAMESPACE} \
-    -e SOURCE_HOST_NAME=${SOURCE_HOST_NAME} -e DESTINATION_HOST_NAME=${DESTINATION_HOST_NAME}
+# - create 301 redirect from oc template
+ansible-playbook maintenance-redirect.yml
 ```
