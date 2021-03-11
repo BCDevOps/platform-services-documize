@@ -13,6 +13,7 @@ module.exports = settings => {
 
   // The deployment of your cool app goes here ▼▼▼
 
+  /*
   //Secrets for Patroni
   //First call will create/generate default values and a template
   oc.createIfMissing(
@@ -25,7 +26,8 @@ module.exports = settings => {
       },
     }),
   );
-
+  */
+/*
   //Second call will create the required object using their respective template (default ones generated above)
   objects = objects.concat(
     oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-secrets.yml`, {
@@ -37,10 +39,11 @@ module.exports = settings => {
       },
     }),
   );
-
+*/
   /**
    * Statefulset - patroni pg:
    */
+  /*
   objects = objects.concat(
     oc.processDeploymentTemplate(`${templatesLocalBaseUrl}/db-deploy.yml`, {
       param: {
@@ -55,6 +58,7 @@ module.exports = settings => {
       },
     }),
   );
+  */
 
   // Conversion - api:
   objects = objects.concat(
@@ -63,6 +67,7 @@ module.exports = settings => {
         NAME: `${phases[phase].name}-conversion`,
         SUFFIX: phases[phase].suffix,
         HOST_VALUE: phases[phase].apiHost,
+        CONVERSION_VERSION: phases[phase].tag,
       },
     }),
   );
