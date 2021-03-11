@@ -95,6 +95,53 @@ objects:
               port: 5432
       policyTypes:
         - Ingress
+
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-app-to-db
+      labels:
+        app: ${NAME}${SUFFIX}
+    spec:
+      # Allow the Documize App to talk to the patroni
+      # database cluster on the given port.
+      podSelector:
+        matchLabels:
+          statefulset: ${NAME}-patroni${SUFFIX}
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  deploymentconfig: ${NAME}${SUFFIX}
+          ports:
+            - protocol: TCP
+              port: 5432
+      policyTypes:
+        - Ingress
+  - apiVersion: networking.k8s.io/v1
+    kind: NetworkPolicy
+    metadata:
+      name: allow-app-to-conversion
+      labels:
+        app: ${NAME}${SUFFIX}
+    spec:
+      # Allow the Documize App to talk to the Documize Conversion
+      # pods on the given ports.
+      podSelector:
+        matchLabels:
+          deploymentconfig: ${NAME}${SUFFIX}
+      ingress:
+        - from:
+            - podSelector:
+                matchLabels:
+                  deploymentconfig: ${NAME}-conversion${SUFFIX}
+          ports:
+            - protocol: http
+              port: 8080
+            - protocol: https
+              port: 8443
+      policyTypes:
+        - Ingress
   # TODO: remove aporeto nsp
   - apiVersion: security.devops.gov.bc.ca/v1alpha1
     kind: NetworkSecurityPolicy
