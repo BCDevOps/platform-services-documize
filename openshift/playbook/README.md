@@ -6,6 +6,39 @@ This is to be used in Argo pipeline.
 - Make sure to update `group_vars/all/vars.yml` for specific environment and fill in the values before starting
 - currently available playbook are listed down below
 
+## Setup for Artifactory
+
+Here are the detailed steps on setting up objects to use Artifactory for image repository: https://developer.gov.bc.ca/Artifact-Repositories-(Artifactory)
+
+
+These are done manually for all dev/test/prod namespaces, and should be good once it's setup.
+
+For each namespace:
+```shell
+# create image pull secret:
+oc create secret docker-registry <pull-secret-name> \
+    --docker-server=artifacts.developer.gov.bc.ca \
+    --docker-username=<username> \
+    --docker-password=<password> \
+    --docker-email=<username>@<namespace>.local
+
+# assign secret to SA:
+oc secrets link default artifactory-pull-secret
+oc secrets link builder artifactory-pull-secret
+
+# sample on how to use image from Artifactory:
+apiVersion: v1
+kind: Pod
+metadata:
+  name: <pod-name>
+spec:
+  containers:
+  - name: <container-name>
+    image: artifacts.developer.gov.bc.ca/<repo-name>/<image>:<tag>
+  imagePullSecrets:
+  - name: artifactory-pull-secret
+```
+
 ## Run
 ```shell
 # <env>: tools / dev / test / prod
